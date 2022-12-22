@@ -129,24 +129,7 @@
 
       const listener = listeners[className]
         ? listeners[className]
-        : (listeners[className] = e => {
-            if (
-              event === 'click' &&
-              element.tagName === 'A' &&
-              !(
-                e.ctrlKey ||
-                e.shiftKey ||
-                e.metaKey ||
-                (e.button && e.button === 1) ||
-                get('target')
-              )
-            ) {
-              e.preventDefault();
-              trackEvent(name);
-            } else {
-              trackEvent(name);
-            }
-          });
+        : (listeners[className] = () => trackEvent(name));
 
       element.addEventListener(event, listener, true);
     });
