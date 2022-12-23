@@ -122,6 +122,8 @@
 
   const addEvent = element => {
     const get = element.getAttribute.bind(element);
+    const href = get('href');
+
     (get('class') || '').split(' ').forEach(className => {
       if (!eventClass.test(className)) return;
 
@@ -129,7 +131,27 @@
 
       const listener = listeners[className]
         ? listeners[className]
-        : (listeners[className] = () => trackEvent(name));
+        : (listeners[className] = e => {
+            if (
+              event === 'click' &&
+              element.tagName === 'A' &&
+              href.startsWith('http') && // Is absolute URL
+              !(
+                e.ctrlKey ||
+                e.shiftKey ||
+                e.metaKey ||
+                (e.button && e.button === 1) ||
+                get('target')
+              )
+            ) {
+              e.preventDefault();
+              trackEvent(name).then(() => {
+                if (href) location.href = href;
+              });
+            } else {
+              trackEvent(name);
+            }
+          });
 
       element.addEventListener(event, listener, true);
     });
